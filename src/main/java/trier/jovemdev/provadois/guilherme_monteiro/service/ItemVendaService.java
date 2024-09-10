@@ -5,5 +5,9 @@ import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personal
 
 public interface ItemVendaService {
 
-    ItemVendaDto create(ItemVendaDto itemVendaDto) throws EntidadeNaoEncontradaException;
+    ItemVendaDto findById(Long id) throws EntidadeNaoEncontradaException;
+
+    ItemVendaDto create(ItemVendaDto itemVendaDto);
+
+    void delete(ItemVendaDto itemVendaDto) throws EntidadeNaoEncontradaException;
 }

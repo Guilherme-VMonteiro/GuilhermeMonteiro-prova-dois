@@ -2,9 +2,9 @@ package trier.jovemdev.provadois.guilherme_monteiro.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.ItemVendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.entity.ItemVendaEntity;
+import trier.jovemdev.provadois.guilherme_monteiro.entity.ProdutoEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.EntidadeNaoEncontradaException;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.ItemVendaRepository;
 import trier.jovemdev.provadois.guilherme_monteiro.service.ItemVendaService;
@@ -19,8 +19,16 @@ public class ItemVendaServiceImpl implements ItemVendaService {
     @Autowired
     private ProdutoService produtoService;
 
-    @Transactional
-    public ItemVendaDto create(ItemVendaDto dto) throws EntidadeNaoEncontradaException {
+    public ItemVendaDto findById(Long id) throws EntidadeNaoEncontradaException {
+        return new ItemVendaDto(itemVendaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("ItemVenda", id)));
+    }
+
+    public ItemVendaDto create(ItemVendaDto dto) {
         return new ItemVendaDto(itemVendaRepository.save(new ItemVendaEntity(dto)));
+    }
+
+    public void delete(ItemVendaDto itemVendaDto) throws EntidadeNaoEncontradaException {
+        itemVendaRepository.delete(new ItemVendaEntity(findById(itemVendaDto.getId())));
+        produtoService.aumentaEstoque(itemVendaDto.getProdutoDto(), itemVendaDto.getQuantidade());
     }
 }

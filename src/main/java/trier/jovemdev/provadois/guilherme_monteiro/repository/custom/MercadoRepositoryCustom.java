@@ -4,5 +4,5 @@ import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoDto;
 
 public interface MercadoRepositoryCustom {
 
-    ProdutoDto produtoMaisVendidoPeloMercado(Long mercadoId);
+
 }

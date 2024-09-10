@@ -35,8 +35,8 @@ public class ItemVendaEntity {
 
     public ItemVendaEntity(ItemVendaDto dto) {
         this.id = dto.getId();
-        this.venda = new VendaEntity(dto.getId());
-        this.produto = new ProdutoEntity(dto.getProdutoId());
+        this.venda = new VendaEntity(dto.getVendaId());
+        this.produto = new ProdutoEntity(dto.getProdutoDto());
         this.quantidade = dto.getQuantidade();
         this.valorTotal = dto.getValorTotal();
     }

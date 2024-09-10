@@ -36,10 +36,6 @@ public class ProdutoEntity {
     @OneToMany(mappedBy = "produto", cascade = CascadeType.DETACH)
     private List<ItemVendaEntity> itemVendas;
 
-    public ProdutoEntity(Long id) {
-        this.id = id;
-    }
-
     public ProdutoEntity(ProdutoDto dto) {
         this.id = dto.getId();
         this.mercado = new MercadoEntity(dto.getMercadoId());

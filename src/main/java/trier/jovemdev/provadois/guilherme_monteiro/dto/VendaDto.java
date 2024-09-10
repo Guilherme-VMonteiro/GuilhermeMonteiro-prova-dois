@@ -10,6 +10,7 @@ import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -30,5 +31,6 @@ public class VendaDto {
         this.status = entity.getStatus();
         this.valorTotal = entity.getValorTotal();
         this.dataCriacao = entity.getDataCriacao();
+        this.itemVendas = entity.getItemVendas().stream().map(ItemVendaDto::new).toList();
     }
 }

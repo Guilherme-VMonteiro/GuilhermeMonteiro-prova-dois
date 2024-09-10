@@ -4,8 +4,7 @@ import trier.jovemdev.provadois.guilherme_monteiro.exceptions.ExcessaoPersonaliz
 
 public class EntidadeNaoEncontradaException extends ExcessaoPersonalizadaBase {
 
-
     public EntidadeNaoEncontradaException(String entidade, Long id) {
-        super(String.format("%s com id: %s não encontrada.", entidade, id));
+        super(String.format("%s com id: %s não encontrado.", entidade, id));
     }
 }

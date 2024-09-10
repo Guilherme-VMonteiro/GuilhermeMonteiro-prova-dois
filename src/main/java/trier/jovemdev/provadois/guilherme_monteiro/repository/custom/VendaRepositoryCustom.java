@@ -7,10 +7,11 @@ import trier.jovemdev.provadois.guilherme_monteiro.dto.VendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface VendaRepositoryCustom {
 
-    Page<VendaDto> findAll(Long idMercado, Pageable pageable, StatusVendaEnum status, Long idProduto);
+    Optional<VendaDto> findById(Long id);
 
-    ProdutoDto produtoDisponivel(Long produtoId, Integer quantidade);
+    Page<VendaDto> findAll(Long idMercado, Pageable pageable, StatusVendaEnum status, Long idProduto);
 }

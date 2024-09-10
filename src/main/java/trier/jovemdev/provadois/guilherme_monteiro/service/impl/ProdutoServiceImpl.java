@@ -15,6 +15,7 @@ import trier.jovemdev.provadois.guilherme_monteiro.service.MercadoService;
 import trier.jovemdev.provadois.guilherme_monteiro.service.ProdutoService;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -28,7 +29,6 @@ public class ProdutoServiceImpl implements ProdutoService {
 
     @Autowired
     private MercadoService mercadoService;
-
 
     public ProdutoDto findById(Long id) throws EntidadeNaoEncontradaException {
         return new ProdutoDto(produtoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("produto", id)));
@@ -76,12 +76,27 @@ public class ProdutoServiceImpl implements ProdutoService {
         mercadoService.findById(dto.getMercadoId());
     }
 
-
     private void validaEdicao(Long produtoId) throws EntidadeNaoEncontradaException, EdicaoDoProdutoNaoPermitidaException {
         findById(produtoId);
 
         if (produtoRepositoryCustom.existeVendasEmAbertoComProduto(produtoId)) {
             throw new EdicaoDoProdutoNaoPermitidaException(produtoId);
         }
+    }
+
+    public List<ProdutoDto>  coletaProdutosPorListaDeIds(List<Long> listaDeIds){
+        return produtoRepositoryCustom.contaProdutosExistentesPorListaDeIds(listaDeIds);
+    }
+
+    public ProdutoDto diminuiEstoqueEmVenda(ProdutoDto produto, Integer quantidadeComprada) throws EntidadeNaoEncontradaException {
+        ProdutoEntity produtoEntity = new ProdutoEntity(findById(produto.getId()));
+        produtoEntity.atualizaEstoque(produtoEntity.getEstoque() - quantidadeComprada);
+        return new ProdutoDto(produtoRepository.save(produtoEntity));
+    }
+
+    public ProdutoDto aumentaEstoque(ProdutoDto produto, Integer quantidadeEstornada) {
+        ProdutoEntity produtoEntity = new ProdutoEntity(findById(produto.getId()));
+        produtoEntity.atualizaEstoque(produtoEntity.getEstoque() + quantidadeEstornada);
+        return new ProdutoDto(produtoRepository.save(produtoEntity));
     }
 }

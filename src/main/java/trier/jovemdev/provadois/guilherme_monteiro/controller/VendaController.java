@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoQuantidadeDto;
+import trier.jovemdev.provadois.guilherme_monteiro.dto.ItemVendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.VendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 import trier.jovemdev.provadois.guilherme_monteiro.service.VendaService;
@@ -17,6 +17,11 @@ public class VendaController {
 
     @Autowired
     private VendaService vendaService;
+
+    @GetMapping("/{id}")
+    public VendaDto getById(@PathVariable Long id) {
+        return vendaService.findById(id);
+    }
 
     @GetMapping()
     public Page<VendaDto> findAllPaginado(
@@ -35,7 +40,17 @@ public class VendaController {
     }
 
     @PutMapping("/{id}/items")
-    public VendaDto adicionarItemsVenda(@PathVariable Long id, @RequestBody List<ProdutoQuantidadeDto> produtos) {
-        return vendaService.adicionarItemsEmUmaVenda(id, produtos);
+    public VendaDto adicionarItemsVenda(@PathVariable Long id, @RequestBody List<ItemVendaDto> itemsVendaList) {
+        return vendaService.adicionarItemsEmUmaVendaEmAberto(id, itemsVendaList);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Long id) {
+        vendaService.excluirVendaComItens(id);
+    }
+
+    @DeleteMapping("/{id}/itemVenda/{idItemVnda}")
+    public VendaDto deleteItemVenda(@PathVariable Long id, @PathVariable Long idItemVnda) {
+         return vendaService.excluirItem(id, idItemVnda);
     }
 }

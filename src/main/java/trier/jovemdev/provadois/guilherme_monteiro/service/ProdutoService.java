@@ -8,6 +8,7 @@ import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personal
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.EntidadeNaoEncontradaException;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface ProdutoService {
 
@@ -20,4 +21,10 @@ public interface ProdutoService {
     ProdutoDto atualizaEstoque(Long idProduto, Integer estoque) throws EntidadeNaoEncontradaException, CampoInvalidoException, EdicaoDoProdutoNaoPermitidaException;
 
     ProdutoDto atualizaValorUnitario(Long idProduto, BigDecimal valorUnitario) throws EntidadeNaoEncontradaException, CampoInvalidoException;
+
+    List<ProdutoDto>  coletaProdutosPorListaDeIds(List<Long> listaDeIds);
+
+    ProdutoDto diminuiEstoqueEmVenda(ProdutoDto produto, Integer quantidadeComprada);
+
+    ProdutoDto aumentaEstoque(ProdutoDto produto, Integer quantidadeEstornada);
 }

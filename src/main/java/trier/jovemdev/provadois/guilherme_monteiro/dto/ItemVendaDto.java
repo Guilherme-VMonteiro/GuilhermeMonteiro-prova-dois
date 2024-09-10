@@ -10,18 +10,18 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ItemVendaDto {
+public class ItemVendaDto{
 
     private Long id;
     private Long vendaId;
-    private Long produtoId;
+    private ProdutoDto produtoDto;
     private Integer quantidade;
     private BigDecimal valorTotal;
 
     public ItemVendaDto(ItemVendaEntity entity) {
         this.id = entity.getId();
         this.vendaId = entity.getVenda().getId();
-        this.produtoId = entity.getProduto().getId();
+        this.produtoDto = new ProdutoDto(entity.getProduto());
         this.quantidade = entity.getQuantidade();
         this.valorTotal = entity.getValorTotal();
     }

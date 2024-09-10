@@ -23,22 +23,5 @@ public class MercadoRepositoryCustomImpl implements MercadoRepositoryCustom {
     final QVendaEntity venda = QVendaEntity.vendaEntity;
     final QItemVendaEntity itemVenda = QItemVendaEntity.itemVendaEntity;
 
-    public ProdutoDto produtoMaisVendidoPeloMercado(Long mercadoId) {
 
-//        JPAQuery<ProdutoDto> query = new JPAQuery<>(em);
-//
-//        query
-//                .select(Projections.constructor(ProdutoDto.class, produto))
-//                .from(produto)
-//                .innerJoin(itemVenda)
-//                .innerJoin(venda)
-//                .innerJoin(mercado)
-//                .where(mercado.id.eq(mercadoId))
-//                .groupBy(produto.id)
-//                .orderBy(itemVenda.id.asc())
-
-        //TODO
-        return null;
-
-    }
 }

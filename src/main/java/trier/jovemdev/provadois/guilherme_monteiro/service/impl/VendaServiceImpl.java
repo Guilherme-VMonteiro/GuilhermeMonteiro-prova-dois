@@ -6,23 +6,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.ItemVendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoDto;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoQuantidadeDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.VendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.entity.VendaEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
-import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.CampoInvalidoException;
-import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.EntidadeNaoEncontradaException;
+import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.*;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.VendaRepository;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.custom.VendaRepositoryCustom;
 import trier.jovemdev.provadois.guilherme_monteiro.service.ItemVendaService;
 import trier.jovemdev.provadois.guilherme_monteiro.service.MercadoService;
+import trier.jovemdev.provadois.guilherme_monteiro.service.ProdutoService;
 import trier.jovemdev.provadois.guilherme_monteiro.service.VendaService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class VendaServiceImpl implements VendaService {
@@ -37,55 +34,138 @@ public class VendaServiceImpl implements VendaService {
     private MercadoService mercadoService;
 
     @Autowired
+    private ProdutoService produtoService;
+
+    @Autowired
     private ItemVendaService itemVendaService;
 
     public VendaDto findById(Long vendaId) throws EntidadeNaoEncontradaException {
-        return new VendaDto(vendaRepository.findById(vendaId).orElseThrow(() -> new EntidadeNaoEncontradaException("venda", vendaId)));
+        return vendaRepositoryCustom.findById(vendaId).orElseThrow(() -> new EntidadeNaoEncontradaException("venda", vendaId));
     }
 
     public Page<VendaDto> findAllPaginado(Long idMercado, Pageable pageable, StatusVendaEnum status, Long idProduto) throws EntidadeNaoEncontradaException {
         return vendaRepositoryCustom.findAll(idMercado, pageable, status, idProduto);
     }
 
-    public VendaDto criarVendaEmAberto(VendaDto dto) throws EntidadeNaoEncontradaException {
+    public VendaDto criarVendaEmAberto(VendaDto dto) throws EntidadeNaoEncontradaException, CampoInvalidoException, VendaVaziaException, EstoqueInsuficienteException {
         VendaDto vendaDto = new VendaDto();
         vendaDto.setMercado(mercadoService.findById(dto.getMercado().getId()));
         vendaDto.setStatus(StatusVendaEnum.EM_ABERTO);
         vendaDto.setDataCriacao(LocalDate.now());
         vendaDto.setValorTotal(BigDecimal.ZERO);
 
-        return new VendaDto(vendaRepository.save(new VendaEntity(vendaDto)));
+        if (!dto.getItemVendas().isEmpty()) {
+            validaTodosProdutosDeUmaVenda(dto.getItemVendas().stream().map(itemVendaDto -> itemVendaDto.getProdutoDto().getId()).toList());
+
+            VendaDto vendaSalva = new VendaDto(vendaRepository.save(new VendaEntity(vendaDto)));
+
+            vendaSalva = adicionarItemsEmUmaVendaEmAberto(vendaSalva.getId(), dto.getItemVendas());
+
+            vendaSalva = findById(vendaSalva.getId());
+            validaVenda(vendaSalva);
+
+            return vendaSalva;
+        } else {
+            throw new VendaVaziaException();
+        }
     }
 
     public VendaDto criarVendaFinalizadaComItens(VendaDto vendaDto) throws EntidadeNaoEncontradaException, CampoInvalidoException {
         return null;
     }
 
-    public VendaDto adicionarItemsEmUmaVenda(Long vendaId, List<ProdutoQuantidadeDto> produtos) throws EntidadeNaoEncontradaException, CampoInvalidoException {
+    public VendaDto adicionarItemsEmUmaVendaEmAberto(Long vendaId, List<ItemVendaDto> itemsVendaList) throws EntidadeNaoEncontradaException, CampoInvalidoException, VendaFechadaException, EstoqueInsuficienteException {
+        VendaDto venda = findById(vendaId);
 
-        for (ProdutoQuantidadeDto produtoQuantidade : produtos) {
-            ItemVendaDto itemVendaDto = new ItemVendaDto();
-            itemVendaDto.setVendaId(vendaId);
-            itemVendaDto.setProdutoId(produtoQuantidade.getProduto().getId());
-            itemVendaDto.setQuantidade(produtoQuantidade.getQuantidade());
-            itemVendaDto.setValorTotal(produtoQuantidade.getProduto().getValorUnitario().multiply(new BigDecimal(produtoQuantidade.getQuantidade())));
-
-            itemVendaService.create(itemVendaDto);
+        if (venda.getStatus().equals(StatusVendaEnum.FINALIZADO)) {
+            throw new VendaFechadaException();
         }
 
-        return findById(vendaId);
+        itemsVendaList.sort(Comparator.comparing(itemVendaDto -> itemVendaDto.getProdutoDto().getId()));
+
+        for (ItemVendaDto itemVendaDto : itemsVendaList) {
+            ProdutoDto produto = produtoService.findById(itemVendaDto.getProdutoDto().getId());
+
+            if (itemVendaDto.getQuantidade() > produto.getEstoque()) {
+                excluirVendaComItens(venda.getId());
+                throw new EstoqueInsuficienteException(produto, itemVendaDto.getQuantidade());
+            }
+
+            itemVendaDto.setVendaId(venda.getId());
+            itemVendaDto.setProdutoDto(produto);
+            itemVendaDto.setValorTotal(produto.getValorUnitario().multiply(new BigDecimal(itemVendaDto.getQuantidade())));
+
+            itemVendaService.create(itemVendaDto);
+
+            produtoService.diminuiEstoqueEmVenda(produto, itemVendaDto.getQuantidade());
+        }
+
+        return findById(venda.getId());
     }
 
-    public VendaDto excluirItem(Long vendaId, Long idItem) throws EntidadeNaoEncontradaException {
-        return null;
+    public VendaDto excluirItem(Long vendaId, Long idItemVenda) throws EntidadeNaoEncontradaException {
+        VendaDto venda = findById(vendaId);
+
+        validaDelecao(venda);
+
+        ItemVendaDto itemVendaDto = venda.getItemVendas().stream().filter(itemVenda -> itemVenda.getId().equals(idItemVenda)).findFirst().orElseThrow((() -> new EntidadeNaoEncontradaException("ItemVenda", idItemVenda)));
+
+        itemVendaService.delete(itemVendaDto);
+
+        venda = findById(vendaId);
+
+        if (findById(vendaId).getItemVendas().isEmpty()) {
+            excluirVendaSemItens(vendaId);
+            return null;
+        }
+
+        return venda;
     }
 
-    public void excluirVenda(Long vendaId) throws EntidadeNaoEncontradaException {
+    public void excluirVendaComItens(Long vendaId) throws EntidadeNaoEncontradaException, VendaFechadaException {
+        VendaDto venda = findById(vendaId);
 
+        validaDelecao(venda);
+
+        venda.getItemVendas().forEach(itemVenda -> itemVendaService.delete(itemVenda));
+
+        vendaRepository.delete(new VendaEntity(findById(venda.getId())));
+    }
+
+    private void excluirVendaSemItens(Long vendaId) throws EntidadeNaoEncontradaException {
+        vendaRepository.delete(new VendaEntity(findById(vendaId)));
     }
 
     public VendaDto finalizarVenda(Long vendaId) throws EntidadeNaoEncontradaException {
         return null;
     }
 
+    private void validaTodosProdutosDeUmaVenda(List<Long> listaDeIds) throws EntidadeNaoEncontradaException {
+        List<Long> listaDeProdutoId = new ArrayList<>(listaDeIds);
+        List<ProdutoDto> listaDeProdutos = produtoService.coletaProdutosPorListaDeIds(listaDeProdutoId);
+
+        Set<Long> setDeProdutoId = new HashSet<>(listaDeProdutoId);
+
+        if (setDeProdutoId.size() != listaDeProdutos.size()) {
+            Collections.sort(listaDeProdutoId);
+            for (int i = 0; i < listaDeProdutos.size(); i++) {
+                if (Objects.equals(listaDeProdutos.get(i).getId(), listaDeProdutoId.get(i))) {
+                    throw new EntidadeNaoEncontradaException("Produto", listaDeProdutoId.get(i));
+                }
+            }
+        }
+    }
+
+    private void validaVenda(VendaDto vendaDto) throws VendaVaziaException {
+        if (vendaDto.getItemVendas().isEmpty()) {
+            excluirVendaSemItens(vendaDto.getId());
+            throw new VendaVaziaException();
+        }
+    }
+
+    private void validaDelecao(VendaDto vendaDto) throws VendaFechadaException, EntidadeNaoEncontradaException {
+        if (findById(vendaDto.getId()).getStatus().equals(StatusVendaEnum.FINALIZADO)) {
+            throw new VendaFechadaException();
+        }
+    }
 }

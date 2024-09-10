@@ -17,6 +17,7 @@ import trier.jovemdev.provadois.guilherme_monteiro.entity.VendaEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.custom.ProdutoRepositoryCustom;
 
+import java.util.List;
 import java.util.Objects;
 
 @Repository
@@ -63,5 +64,17 @@ public class ProdutoRespositoryImpl implements ProdutoRepositoryCustom {
                 .where(produto.id.eq(idProduto).and(venda.status.eq(StatusVendaEnum.EM_ABERTO)));
 
         return query.fetchOne() != null;
+    }
+
+    public List<ProdutoDto> contaProdutosExistentesPorListaDeIds(List<Long> listaDeIds) {
+        JPAQuery<ProdutoDto> query = new JPAQuery<>(em);
+
+        query
+                .select(Projections.constructor(ProdutoDto.class, produto))
+                .from(produto)
+                .where(produto.id.in(listaDeIds))
+                .orderBy(produto.id.asc());
+
+        return query.fetch();
     }
 }
