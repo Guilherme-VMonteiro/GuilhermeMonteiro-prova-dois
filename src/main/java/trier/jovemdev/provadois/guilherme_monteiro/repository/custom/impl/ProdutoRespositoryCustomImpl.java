@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Repository
-public class ProdutoRespositoryImpl implements ProdutoRepositoryCustom {
+public class ProdutoRespositoryCustomImpl implements ProdutoRepositoryCustom {
 
     @PersistenceContext
     private EntityManager em;
@@ -76,5 +76,20 @@ public class ProdutoRespositoryImpl implements ProdutoRepositoryCustom {
                 .orderBy(produto.id.asc());
 
         return query.fetch();
+    }
+
+    public ProdutoDto findProdutoMaisVendidoPorMercado(Long mercadoId) {
+        JPAQuery<ProdutoDto> query = new JPAQuery<>(em);
+
+        query
+                .select(Projections.constructor(ProdutoDto.class, produto))
+                .from(produto)
+                .innerJoin(produto.itemVendas, itemVenda)
+                .where(produto.mercado.id.eq(mercadoId))
+                .groupBy(produto.id)
+                .orderBy(produto.id.desc())
+                .limit(1);
+
+        return query.fetchOne();
     }
 }

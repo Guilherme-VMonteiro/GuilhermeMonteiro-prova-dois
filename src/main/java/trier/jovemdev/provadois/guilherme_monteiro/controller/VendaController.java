@@ -39,6 +39,16 @@ public class VendaController {
         return vendaService.criarVendaEmAberto(vendaDto);
     }
 
+    @PostMapping("/finalizada")
+    public VendaDto criarVendaFechada(@RequestBody VendaDto vendaDto) {
+        return vendaService.criarVendaFinalizadaComItens(vendaDto);
+    }
+
+    @PutMapping("/{id}")
+    public VendaDto finalizarVenda(@PathVariable Long id) {
+        return vendaService.finalizarVenda(id);
+    }
+
     @PutMapping("/{id}/items")
     public VendaDto adicionarItemsVenda(@PathVariable Long id, @RequestBody List<ItemVendaDto> itemsVendaList) {
         return vendaService.adicionarItemsEmUmaVendaEmAberto(id, itemsVendaList);
@@ -51,6 +61,6 @@ public class VendaController {
 
     @DeleteMapping("/{id}/itemVenda/{idItemVnda}")
     public VendaDto deleteItemVenda(@PathVariable Long id, @PathVariable Long idItemVnda) {
-         return vendaService.excluirItem(id, idItemVnda);
+        return vendaService.excluirItem(id, idItemVnda);
     }
 }

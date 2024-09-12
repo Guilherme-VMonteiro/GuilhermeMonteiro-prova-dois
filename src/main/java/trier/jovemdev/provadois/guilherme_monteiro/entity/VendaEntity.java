@@ -56,4 +56,8 @@ public class VendaEntity {
             this.itemVendas = new ArrayList<>();
         }
     }
+
+    public void finalizarVenda() {
+        this.status = StatusVendaEnum.FINALIZADO;
+    }
 }

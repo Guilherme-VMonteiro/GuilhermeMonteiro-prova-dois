@@ -84,8 +84,12 @@ public class ProdutoServiceImpl implements ProdutoService {
         }
     }
 
-    public List<ProdutoDto>  coletaProdutosPorListaDeIds(List<Long> listaDeIds){
+    public List<ProdutoDto> coletaProdutosPorListaDeIds(List<Long> listaDeIds) {
         return produtoRepositoryCustom.contaProdutosExistentesPorListaDeIds(listaDeIds);
+    }
+
+    public ProdutoDto findProdutoMaisVendido(Long mercadoId) throws EntidadeNaoEncontradaException {
+        return produtoRepositoryCustom.findProdutoMaisVendidoPorMercado(mercadoId);
     }
 
     public ProdutoDto diminuiEstoqueEmVenda(ProdutoDto produto, Integer quantidadeComprada) throws EntidadeNaoEncontradaException {

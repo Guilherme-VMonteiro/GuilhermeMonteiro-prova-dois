@@ -2,16 +2,16 @@ package trier.jovemdev.provadois.guilherme_monteiro.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import trier.jovemdev.provadois.guilherme_monteiro.dto.FaturamentoDiaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.MercadoDto;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoDto;
 import trier.jovemdev.provadois.guilherme_monteiro.entity.MercadoEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.CampoInvalidoException;
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.CnpjExistenteException;
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.EntidadeNaoEncontradaException;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.MercadoRepository;
+import trier.jovemdev.provadois.guilherme_monteiro.repository.custom.MercadoRepositoryCustom;
 import trier.jovemdev.provadois.guilherme_monteiro.service.MercadoService;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -20,6 +20,9 @@ public class MercadoServiceImpl implements MercadoService {
 
     @Autowired
     private MercadoRepository mercadoRepository;
+
+    @Autowired
+    private MercadoRepositoryCustom mercadoRepositoryCustom;
 
     public MercadoDto findById(Long id) throws EntidadeNaoEncontradaException {
         return new MercadoDto(mercadoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Mercado", id)));
@@ -31,12 +34,8 @@ public class MercadoServiceImpl implements MercadoService {
         return new MercadoDto(mercadoRepository.save(new MercadoEntity(mercadoDto)));
     }
 
-    public ProdutoDto produtoMaisVendido(Long mercadoId) throws EntidadeNaoEncontradaException {
-        return null;
-    }
-
-    public BigDecimal buscarFaturamentoPeloDia(Long mercadoId, LocalDate dia) throws EntidadeNaoEncontradaException {
-        return null;
+    public FaturamentoDiaDto buscarFaturamentoPeloDia(Long mercadoId, LocalDate dia) throws EntidadeNaoEncontradaException {
+        return new FaturamentoDiaDto(dia, mercadoRepositoryCustom.findFaturamentoPorDia(mercadoId, dia));
     }
 
     private void validaCamposCriacao(MercadoDto dto) throws CampoInvalidoException, CnpjExistenteException {

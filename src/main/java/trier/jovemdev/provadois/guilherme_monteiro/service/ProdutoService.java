@@ -22,7 +22,9 @@ public interface ProdutoService {
 
     ProdutoDto atualizaValorUnitario(Long idProduto, BigDecimal valorUnitario) throws EntidadeNaoEncontradaException, CampoInvalidoException;
 
-    List<ProdutoDto>  coletaProdutosPorListaDeIds(List<Long> listaDeIds);
+    List<ProdutoDto> coletaProdutosPorListaDeIds(List<Long> listaDeIds);
+
+    ProdutoDto findProdutoMaisVendido(Long mercadoId) throws EntidadeNaoEncontradaException;
 
     ProdutoDto diminuiEstoqueEmVenda(ProdutoDto produto, Integer quantidadeComprada);
 

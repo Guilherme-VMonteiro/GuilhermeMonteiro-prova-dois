@@ -61,6 +61,8 @@ public class VendaServiceImpl implements VendaService {
 
             vendaSalva = adicionarItemsEmUmaVendaEmAberto(vendaSalva.getId(), dto.getItemVendas());
 
+            atualizaTotalVenda(vendaSalva);
+
             vendaSalva = findById(vendaSalva.getId());
             validaVenda(vendaSalva);
 
@@ -71,7 +73,7 @@ public class VendaServiceImpl implements VendaService {
     }
 
     public VendaDto criarVendaFinalizadaComItens(VendaDto vendaDto) throws EntidadeNaoEncontradaException, CampoInvalidoException {
-        return null;
+        return finalizarVenda(criarVendaEmAberto(vendaDto).getId());
     }
 
     public VendaDto adicionarItemsEmUmaVendaEmAberto(Long vendaId, List<ItemVendaDto> itemsVendaList) throws EntidadeNaoEncontradaException, CampoInvalidoException, VendaFechadaException, EstoqueInsuficienteException {
@@ -100,6 +102,8 @@ public class VendaServiceImpl implements VendaService {
             produtoService.diminuiEstoqueEmVenda(produto, itemVendaDto.getQuantidade());
         }
 
+        atualizaTotalVenda(venda);
+
         return findById(venda.getId());
     }
 
@@ -111,6 +115,10 @@ public class VendaServiceImpl implements VendaService {
         ItemVendaDto itemVendaDto = venda.getItemVendas().stream().filter(itemVenda -> itemVenda.getId().equals(idItemVenda)).findFirst().orElseThrow((() -> new EntidadeNaoEncontradaException("ItemVenda", idItemVenda)));
 
         itemVendaService.delete(itemVendaDto);
+
+        venda.getItemVendas().removeIf(itemVenda -> itemVenda.getId().equals(itemVendaDto.getId()));
+
+        atualizaTotalVenda(venda);
 
         venda = findById(vendaId);
 
@@ -137,7 +145,11 @@ public class VendaServiceImpl implements VendaService {
     }
 
     public VendaDto finalizarVenda(Long vendaId) throws EntidadeNaoEncontradaException {
-        return null;
+        VendaEntity vendaEntity = new VendaEntity(findById(vendaId));
+
+        vendaEntity.finalizarVenda();
+
+        return new VendaDto(vendaRepository.save(vendaEntity));
     }
 
     private void validaTodosProdutosDeUmaVenda(List<Long> listaDeIds) throws EntidadeNaoEncontradaException {
@@ -167,5 +179,13 @@ public class VendaServiceImpl implements VendaService {
         if (findById(vendaDto.getId()).getStatus().equals(StatusVendaEnum.FINALIZADO)) {
             throw new VendaFechadaException();
         }
+    }
+
+    private void atualizaTotalVenda(VendaDto vendaDto) throws EntidadeNaoEncontradaException {
+        VendaDto venda = findById(vendaDto.getId());
+
+        venda.setValorTotal(venda.getItemVendas().stream().map(ItemVendaDto::getValorTotal).reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        vendaRepository.save(new VendaEntity(venda));
     }
 }

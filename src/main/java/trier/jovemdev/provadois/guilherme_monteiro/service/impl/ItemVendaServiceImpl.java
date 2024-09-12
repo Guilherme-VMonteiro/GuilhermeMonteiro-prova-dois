@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.ItemVendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.entity.ItemVendaEntity;
-import trier.jovemdev.provadois.guilherme_monteiro.entity.ProdutoEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.exceptions.excessoes_personalizadas.EntidadeNaoEncontradaException;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.ItemVendaRepository;
 import trier.jovemdev.provadois.guilherme_monteiro.service.ItemVendaService;

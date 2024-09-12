@@ -44,4 +44,9 @@ public class ProdutoController {
     public ProdutoDto atualizaValorUnitario(@PathVariable Long id, @PathVariable BigDecimal valor) {
         return produtoService.atualizaValorUnitario(id, valor);
     }
+
+    @GetMapping("/mercado/{id}")
+    public ProdutoDto findProdutoMaisVendido(@PathVariable Long id) {
+        return produtoService.findProdutoMaisVendido(id);
+    }
 }

@@ -12,5 +12,7 @@ public interface ProdutoRepositoryCustom {
 
     Boolean existeVendasEmAbertoComProduto(Long idProduto);
 
-    List<ProdutoDto>  contaProdutosExistentesPorListaDeIds(List<Long> listaDeIds);
+    List<ProdutoDto> contaProdutosExistentesPorListaDeIds(List<Long> listaDeIds);
+
+    ProdutoDto findProdutoMaisVendidoPorMercado(Long mercadoId);
 }

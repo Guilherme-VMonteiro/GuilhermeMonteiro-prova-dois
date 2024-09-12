@@ -2,11 +2,9 @@ package trier.jovemdev.provadois.guilherme_monteiro.repository.custom;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.VendaDto;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface VendaRepositoryCustom {

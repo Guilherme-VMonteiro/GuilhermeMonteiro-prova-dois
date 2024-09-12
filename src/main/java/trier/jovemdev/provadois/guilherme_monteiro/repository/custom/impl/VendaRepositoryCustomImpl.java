@@ -9,15 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ItemVendaDto;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.MercadoDto;
-import trier.jovemdev.provadois.guilherme_monteiro.dto.ProdutoDto;
 import trier.jovemdev.provadois.guilherme_monteiro.dto.VendaDto;
-import trier.jovemdev.provadois.guilherme_monteiro.entity.*;
+import trier.jovemdev.provadois.guilherme_monteiro.entity.QItemVendaEntity;
+import trier.jovemdev.provadois.guilherme_monteiro.entity.QMercadoEntity;
+import trier.jovemdev.provadois.guilherme_monteiro.entity.QProdutoEntity;
+import trier.jovemdev.provadois.guilherme_monteiro.entity.QVendaEntity;
 import trier.jovemdev.provadois.guilherme_monteiro.enums.StatusVendaEnum;
 import trier.jovemdev.provadois.guilherme_monteiro.repository.custom.VendaRepositoryCustom;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
